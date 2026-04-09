@@ -1,0 +1,32 @@
+SmartPark
+Monitoring Dashboard
+LIVE
+--:--:--
+Total Slots
+4
+All zones
+Available
+—
+Ready to park
+Occupied
+—
+Vehicles parked
+Occupancy
+—
+Current rate
+Parking Zone — Block A
+↻ Refresh
+Ground Level
+Sensor ID: HC-SR04 · Arduino Nano · GSM/GPRS
+Capacity used
+↔ Driveway / Entry–Exit Lane
+Available
+Occupied
+Updates every 3 seconds
+Recent Activity
+System initialized — all sensors online
+Just now
+GSM/GPRS Connected
+Arduino Nano Online
+API: yourserver.com
+Next update: 3s
