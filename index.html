@@ -1,10 +1,117 @@
-<h1>Smart Parking Dashboard</h1>
-
-<div class="parking-lot">
-
-<div id="slot1" class="slot">Slot 1</div>
-<div id="slot2" class="slot">Slot 2</div>
-<div id="slot3" class="slot">Slot 3</div>
-<div id="slot4" class="slot">Slot 4</div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPark — Parking Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">🅿</div>
+    <div>
+      <div class="nav-title">SmartPark</div>
+      <div class="nav-subtitle">Monitoring Dashboard</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+    <div class="time-display" id="clock">--:--:--</div>
+  </div>
+</nav>
+ 
+<!-- MAIN -->
+<div class="main">
+ 
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-label">Total Slots</div>
+      <div class="stat-value">4</div>
+      <div class="stat-sub">All zones</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Available</div>
+      <div class="stat-value" id="stat-available">—</div>
+      <div class="stat-sub">Ready to park</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Occupied</div>
+      <div class="stat-value" id="stat-occupied">—</div>
+      <div class="stat-sub">Vehicles parked</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Occupancy</div>
+      <div class="stat-value" id="stat-pct">—</div>
+      <div class="stat-sub">Current rate</div>
+    </div>
+  </div>
+ 
+  <!-- SECTION HEADER -->
+  <div class="section-header">
+    <div class="section-title">Parking Zone — Block A</div>
+    <button class="refresh-btn" onclick="simulateFetch()">↻ Refresh</button>
+  </div>
+ 
+  <!-- PARKING LOT -->
+  <div class="parking-lot-wrapper">
+    <div class="lot-header">
+      <div>
+        <div class="lot-name">Ground Level</div>
+        <div class="lot-id">Sensor ID: HC-SR04 · Arduino Nano · GSM/GPRS</div>
+      </div>
+      <div class="capacity-bar-wrap">
+        <div class="capacity-label">Capacity used</div>
+        <div class="capacity-bar">
+          <div class="capacity-fill" id="cap-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="road">
+      <div class="road-label">↔ Driveway / Entry–Exit Lane</div>
+      <div class="slot-grid" id="slot-grid"></div>
+    </div>
+ 
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px;">
+      <div class="legend">
+        <div class="legend-item"><div class="legend-box green"></div> Available</div>
+        <div class="legend-item"><div class="legend-box red"></div> Occupied</div>
+      </div>
+      <div style="font-size:11px;color:#334155;">Updates every 3 seconds</div>
+    </div>
+ 
+    <div class="sim-row" id="sim-row"></div>
+  </div>
+ 
+  <!-- ACTIVITY FEED -->
+  <div class="activity-panel">
+    <div class="activity-header">Recent Activity</div>
+    <div class="activity-list" id="activity-list">
+      <div class="activity-item">
+        <div class="activity-dot green"></div>
+        <div class="activity-text">System initialized — all sensors online</div>
+        <div class="activity-time">Just now</div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-item"><div class="status-dot green"></div><span>GSM/GPRS Connected</span></div>
+    <div class="status-item"><div class="status-dot green"></div><span>Arduino Nano Online</span></div>
+    <div class="status-item"><div class="status-dot amber"></div><span>API: yourserver.com</span></div>
+    <div class="status-item"><span>Next update: <span id="countdown">3s</span></span></div>
+  </div>
+ 
 </div>
+ 
+<script src="script.js"></script>
+</body>
+</html>
