@@ -1,0 +1,23 @@
+.parking-lot{
+display:grid;
+grid-template-columns: repeat(2,150px);
+gap:20px;
+}
+
+.slot{
+height:100px;
+width:150px;
+border:2px solid black;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+}
+
+.empty{
+background:green;
+}
+
+.occupied{
+background:red;
+}
