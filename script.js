@@ -1,26 +1,34 @@
-// ── STATE ──
+// ============================================================
+//  SmartPark — Dashboard Script
+//  Live dashboard: https://ravulavishnu426.github.io/smart-parking-dashboard/
+//  Replace SERVER_URL below with your actual backend IP/domain
+// ============================================================
+
+const SERVER_URL = "http://YOUR_SERVER_IP:3000";   // ← change this
+
 const slotNames  = ['Slot 1','Slot 2','Slot 3','Slot 4'];
 const sensorPins = ['D2/D3','D4/D5','D6/D7','D8/D9'];
-let slotStatus   = [0, 1, 0, 1]; // 0 = empty, 1 = occupied
+let slotStatus   = [0, 1, 0, 1];
 let countdown    = 3;
- 
-// ── CLOCK ──
+let usingRealServer = false;
+
+// ── CLOCK ──────────────────────────────────────────────────
 function updateClock() {
   document.getElementById('clock').textContent = new Date().toLocaleTimeString();
 }
 setInterval(updateClock, 1000);
 updateClock();
- 
-// ── RENDER SLOTS ──
+
+// ── RENDER SLOTS ───────────────────────────────────────────
 function renderSlots() {
   const grid   = document.getElementById('slot-grid');
   const simRow = document.getElementById('sim-row');
   grid.innerHTML   = '';
   simRow.innerHTML = '';
- 
+
   slotStatus.forEach((status, i) => {
     const isEmpty = status === 0;
- 
+
     const card = document.createElement('div');
     card.className = `slot-card ${isEmpty ? 'empty' : 'occupied'}`;
     card.innerHTML = `
@@ -41,51 +49,49 @@ function renderSlots() {
       </div>
     `;
     grid.appendChild(card);
- 
-    const btn = document.createElement('button');
-    btn.className = `sim-btn ${!isEmpty ? 'active-toggle' : ''}`;
-    btn.textContent = `Toggle S${i + 1}`;
-    btn.onclick = () => toggleSlot(i);
-    simRow.appendChild(btn);
+
+    // Only show toggle buttons in demo mode
+    if (!usingRealServer) {
+      const btn = document.createElement('button');
+      btn.className = `sim-btn ${!isEmpty ? 'active-toggle' : ''}`;
+      btn.textContent = `Toggle S${i + 1}`;
+      btn.onclick = () => toggleSlot(i);
+      simRow.appendChild(btn);
+    }
   });
- 
+
   updateStats();
 }
- 
-// ── STATS ──
+
+// ── STATS ──────────────────────────────────────────────────
 function updateStats() {
   const occupied  = slotStatus.filter(s => s === 1).length;
   const available = 4 - occupied;
   const pct       = Math.round((occupied / 4) * 100);
- 
+
   document.getElementById('stat-available').textContent = available;
   document.getElementById('stat-occupied').textContent  = occupied;
   document.getElementById('stat-pct').textContent       = pct + '%';
- 
+
   const fill = document.getElementById('cap-fill');
   fill.style.width = pct + '%';
- 
-  if (pct >= 75) {
-    fill.style.background = 'linear-gradient(90deg,#ef4444,#f87171)';
-  } else if (pct >= 50) {
-    fill.style.background = 'linear-gradient(90deg,#f59e0b,#fbbf24)';
-  } else {
-    fill.style.background = 'linear-gradient(90deg,#22c55e,#4ade80)';
-  }
+  fill.style.background =
+    pct >= 75 ? 'linear-gradient(90deg,#ef4444,#f87171)' :
+    pct >= 50 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' :
+                'linear-gradient(90deg,#22c55e,#4ade80)';
 }
- 
-// ── TOGGLE SLOT ──
+
+// ── TOGGLE SLOT (demo only) ─────────────────────────────────
 function toggleSlot(i) {
   slotStatus[i] = slotStatus[i] === 0 ? 1 : 0;
-  const occupied = slotStatus[i] === 1;
   addActivity(
-    `Slot ${i + 1} is now ${occupied ? 'occupied' : 'available'}`,
-    occupied ? 'red' : 'green'
+    `Slot ${i + 1} is now ${slotStatus[i] === 1 ? 'occupied' : 'available'}`,
+    slotStatus[i] === 1 ? 'red' : 'green'
   );
   renderSlots();
 }
- 
-// ── ACTIVITY FEED ──
+
+// ── ACTIVITY FEED ───────────────────────────────────────────
 function addActivity(text, color) {
   const list = document.getElementById('activity-list');
   const time = new Date().toLocaleTimeString();
@@ -99,46 +105,73 @@ function addActivity(text, color) {
   list.insertBefore(item, list.firstChild);
   while (list.children.length > 5) list.removeChild(list.lastChild);
 }
- 
-// ── FETCH FROM REAL SERVER (uncomment when backend is ready) ──
-// function fetchFromServer() {
-//   fetch("http://yourserver.com/status")
-//     .then(r => r.json())
-//     .then(data => {
-//       slotStatus = [+data.slot1, +data.slot2, +data.slot3, +data.slot4];
-//       addActivity('Data refreshed from Arduino sensor', 'green');
-//       renderSlots();
-//     })
-//     .catch(() => addActivity('Server connection failed — retrying...', 'red'));
-// }
- 
-// ── SIMULATE FETCH (demo mode) ──
+
+// ── FETCH FROM REAL ARDUINO BACKEND ────────────────────────
+function fetchFromServer() {
+  fetch(`${SERVER_URL}/status`)
+    .then(r => {
+      if (!r.ok) throw new Error('Server error');
+      return r.json();
+    })
+    .then(data => {
+      const prev = [...slotStatus];
+      slotStatus = [+data.slot1, +data.slot2, +data.slot3, +data.slot4];
+
+      slotStatus.forEach((s, i) => {
+        if (s !== prev[i]) {
+          addActivity(
+            `Slot ${i + 1} → ${s === 1 ? 'occupied' : 'available'} (sensor update)`,
+            s === 1 ? 'red' : 'green'
+          );
+        }
+      });
+
+      usingRealServer = true;
+      renderSlots();
+    })
+    .catch(() => {
+      // Fall back to demo simulation if server unreachable
+      usingRealServer = false;
+      simulateFetch();
+    });
+}
+
+// ── SIMULATE FETCH (demo / fallback) ───────────────────────
 function simulateFetch() {
-  addActivity('Polling sensor data from Arduino...', 'green');
+  addActivity('Demo mode — polling simulated sensor data', 'green');
   setTimeout(() => {
     const r = Math.floor(Math.random() * 4);
     const prev = slotStatus[r];
     slotStatus[r] = slotStatus[r] === 0 ? 1 : 0;
     if (prev !== slotStatus[r]) {
       addActivity(
-        `Sensor update: Slot ${r + 1} → ${slotStatus[r] === 1 ? 'occupied' : 'available'}`,
+        `Slot ${r + 1} → ${slotStatus[r] === 1 ? 'occupied' : 'available'}`,
         slotStatus[r] === 1 ? 'red' : 'green'
       );
     }
     renderSlots();
   }, 600);
 }
- 
-// ── COUNTDOWN TIMER ──
+
+// ── MAIN REFRESH (tries real server first) ──────────────────
+function simulateFetchOrReal() {
+  if (SERVER_URL.includes("YOUR_SERVER_IP")) {
+    simulateFetch();   // No server configured yet → demo mode
+  } else {
+    fetchFromServer(); // Real Arduino backend
+  }
+}
+
+// ── COUNTDOWN TIMER (every 3 seconds) ──────────────────────
 setInterval(() => {
   countdown--;
   if (countdown <= 0) {
     countdown = 3;
-    simulateFetch();
+    simulateFetchOrReal();
   }
   document.getElementById('countdown').textContent = countdown + 's';
 }, 1000);
- 
-// ── INIT ──
+
+// ── INIT ────────────────────────────────────────────────────
 renderSlots();
- 
+addActivity('Dashboard loaded — https://ravulavishnu426.github.io/smart-parking-dashboard/', 'green');
