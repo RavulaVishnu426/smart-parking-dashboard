@@ -155,7 +155,7 @@ function simulateFetch() {
 
 // ── MAIN REFRESH (tries real server first) ──────────────────
 function simulateFetchOrReal() {
-  if (SERVER_URL.includes("YOUR_SERVER_IP")) {
+  if (SERVER_URL.includes("10.18.66.64")) {
     simulateFetch();   // No server configured yet → demo mode
   } else {
     fetchFromServer(); // Real Arduino backend
