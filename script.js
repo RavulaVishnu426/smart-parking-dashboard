@@ -110,10 +110,13 @@ function addActivity(text, color) {
 function fetchFromServer() {
   fetch(`${SERVER_URL}/status`)
     .then(r => {
+      console.log("Response status:", r.status);
       if (!r.ok) throw new Error('Server error');
       return r.json();
     })
     .then(data => {
+      console.log("Data received:", data);
+
       const prev = [...slotStatus];
       slotStatus = [+data.slot1, +data.slot2, +data.slot3, +data.slot4];
 
@@ -129,8 +132,8 @@ function fetchFromServer() {
       usingRealServer = true;
       renderSlots();
     })
-    .catch(() => {
-      // Fall back to demo simulation if server unreachable
+    .catch((err) => {
+      console.log("Fetch error:", err);
       usingRealServer = false;
       simulateFetch();
     });
@@ -155,11 +158,7 @@ function simulateFetch() {
 
 // ── MAIN REFRESH (tries real server first) ──────────────────
 function simulateFetchOrReal() {
-  if (SERVER_URL.includes("10.18.66.64")) {
-    simulateFetch();   // No server configured yet → demo mode
-  } else {
     fetchFromServer(); // Real Arduino backend
-  }
 }
 
 // ── COUNTDOWN TIMER (every 3 seconds) ──────────────────────
