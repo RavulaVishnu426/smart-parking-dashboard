@@ -4,7 +4,7 @@
 //  Replace SERVER_URL below with your actual backend IP/domain
 // ============================================================
 
-const SERVER_URL = "192.168.29.153:3000";   // ← change this
+const SERVER_URL = "http://192.168.29.153:3000/update?s1=1&s2=0&s3=0&s4=1";   // ← change this
 
 const slotNames  = ['Slot 1','Slot 2','Slot 3','Slot 4'];
 const sensorPins = ['D2/D3','D4/D5','D6/D7','D8/D9'];
